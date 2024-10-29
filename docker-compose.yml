@@ -1,14 +1,19 @@
 services:
   php:
+    build: 
+      context: .
+      dockerfile: Dockerfile
     image: php:8.1-apache
     container_name: php_container
     volumes:
       - ./src:/var/www/html
+      - ./apache.conf:/etc/apache2/conf-enabled/servername.conf
     ports:
       - "8080:80"
     networks:
       - mynetwork
-
+    depends_on:
+      - mysql
   mysql:
     image: mysql:8.0
     container_name: mysql_container
@@ -21,7 +26,6 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - mynetwork
-
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin_container
@@ -32,9 +36,7 @@ services:
       - "8081:80"
     networks:
       - mynetwork
-
 networks:
   mynetwork:
-
 volumes:
   mysql_data:

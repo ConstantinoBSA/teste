@@ -2,7 +2,9 @@
 
 namespace Controllers;
 
-class TarefaController extends \core\Controller {
+use Core\Controller;
+
+class TarefaController extends Controller {
     public function index() {
         $tarefaModel = $this->model('Tarefa');
         $tarefas = $tarefaModel->getAll();
