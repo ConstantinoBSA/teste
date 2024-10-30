@@ -3,9 +3,11 @@
 namespace Controllers;
 
 use Core\Controller;
+use Models\Usuario;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SmtpTransport;
+use App\Mail\VerificationEmail;
 
 class AuthController extends Controller
 {
@@ -53,13 +55,7 @@ class AuthController extends Controller
                     ->setBody($emailContent, 'text/html');
 
                 // Envio da mensagem
-                $result = $mailer->send($message);
-
-                // if ($result) {
-                //     echo "Um link de redefinição de senha foi enviado para o seu e-mail.";
-                // } else {
-                //     echo "Houve um problema ao enviar o e-mail.";
-                // }
+                $mailer->send($message);
         
                 $_SESSION['flash_message'] = "Um link de redefinição de senha foi enviado para o seu e-mail.";
             } else {
@@ -109,6 +105,74 @@ class AuthController extends Controller
             $token = $_GET['token'] ?? null;
 
             $this->view('auth/reset-password', ['token' => $token]);
+        }
+    }
+
+    public function verifyRequired()
+    {
+        session_start();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['email'])) {
+                $email = $_POST['email'];
+
+                $usuarioModel = new Usuario();
+                $usuario = $usuarioModel->getById($_SESSION['user_id']);
+
+                // Gere um token único e seguro
+                $token = bin2hex(random_bytes(50));
+
+                // Armazene o token de verificação no banco de dados
+                $usuarioModel->storeEmailVerificationToken($email, $token);
+                new VerificationEmail($usuario, $token);
+
+                if ($usuario) {
+                    $_SESSION['message'] = "Registro adicionaado com sucesso!";
+                    $_SESSION['message_type'] = "success";
+                } else {
+                    $_SESSION['message'] = 'Erro ao adicionar usuario. Por favor, tente novamente!';
+                    $_SESSION['message_type'] = "success";
+                }
+                header('Location: /verify-required');
+            } else {
+                // Se o token não estiver presente, redirecione ou mostre um erro
+                $_SESSION['error_message'] = "Token de verificação ausente.";
+                $this->view('auth/verify-required');
+            }
+        } else {
+            
+            $this->view('auth/verify-required');
+        }
+    }
+
+    public function verifyEmail()
+    {
+        if (isset($_GET['token'])) {
+            $token = $_GET['token'];
+            $usuarioModel = $this->model('Usuario');
+
+            // Verifique se o token é válido e obtenha o e-mail associado
+            $email = $usuarioModel->findEmailVerificationByToken($token);
+
+            if ($email) {
+                // Atualize o status do e-mail no banco de dados para verificado
+                $usuarioModel->verifyUserEmail($email);
+
+                // Remova o token de verificação
+                $usuarioModel->invalidateVerificationToken($token);
+
+                // Armazene uma mensagem de sucesso na sessão
+                $_SESSION['flash_message'] = "E-mail verificado com sucesso!";
+                header('Location: /login');
+                exit();
+            } else {
+                // Armazene uma mensagem de erro na sessão
+                $_SESSION['error_message'] = "Token inválido ou expirado.";
+                $this->view('auth/verification-email');
+            }
+        } else {
+            // Se o token não estiver presente, redirecione ou mostre um erro
+            $_SESSION['error_message'] = "Token de verificação ausente.";
+            $this->view('auth/verification-email');
         }
     }
 

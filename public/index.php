@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+use App\Middleware\EmailVerifiedMiddleware;
+
 // Função para carregar automaticamente classes do projeto
 spl_autoload_register(function ($class) {
     $base_dir = __DIR__ . '/../app/';
@@ -28,6 +30,19 @@ function renderErrorPage($title, $message)
 // Carregar as rotas
 $routes = require __DIR__ . '/../routes/web.php';
 
+// Definir rotas que requerem verificação de e-mail
+$protectedRoutes = [
+    '',
+    'tarefas/index',
+    'tarefas/create',
+    'tarefas/edit/{id}',
+    'tarefas/delete/{id}',
+    'usuarios/index',
+    'usuarios/create',
+    'usuarios/edit/{id}',
+    'usuarios/delete/{id}',
+];
+
 // Obter a URL requisitada e remover a barra inicial
 $request = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
@@ -47,8 +62,16 @@ foreach ($routes as $route => $controllerAction) {
             // Remover os índices numéricos do array de correspondências
             $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-            // Chamar o método do controlador com os parâmetros capturados
-            call_user_func_array([$controller, $method], $params);
+            /// Verifique se a rota é protegida
+            if (in_array($route, $protectedRoutes)) {
+                $middleware = new EmailVerifiedMiddleware();
+                $middleware->handle($_SERVER, function() use ($controller, $method, $params) {
+                    call_user_func_array([$controller, $method], $params);
+                });
+            } else {
+                // Chame o controlador diretamente se a rota não for protegida
+                call_user_func_array([$controller, $method], $params);
+            }
             exit;
         } else {
             renderErrorPage('Erro 404', 'Controlador ou método não encontrado.');

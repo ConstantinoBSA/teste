@@ -1,7 +1,11 @@
 body {
-    padding: 25px;
+    /* padding: 25px; */
 }
 
 .error {
     color: red;
+}
+
+table tr td{
+    vertical-align: middle;
 }

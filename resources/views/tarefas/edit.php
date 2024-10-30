@@ -2,10 +2,17 @@
 ob_start(); // Inicia o buffer de saída
 ?>
 
-<h1>Editar Tarefa</h1>
-<a href="/tarefas/index">Voltar</a>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="<?php echo BASE_URL ?>"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="<?php echo BASE_URL ?>/tarefas/index">Tarefas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Editar</li>
+  </ol>
+</nav>
 
-<form method="post" action="/tarefas/edit/<?php echo $data['id']; ?>">
+<h4 class="mb-4">Editando Tarefa</h4>
+
+<form method="post" action="/tarefas/edit/<?php echo $data['id']; ?>" class="w-50">
     <div class="mb-3">
         <label for="titulo" class="form-label">Título</label>
         <input type="text" class="form-control" id="titulo" name="titulo" value="<?php echo htmlspecialchars($data['titulo'] ?? ''); ?>">
@@ -37,7 +44,11 @@ ob_start(); // Inicia o buffer de saída
         <?php endif; ?>
     </div>
 
-    <button class="btn btn-primary" type="submit">Salvar Alterações</button>
+    <div class="text-center">
+        <button class="btn btn-primary" type="submit"><i class="fa fa-check fa-fw"></i> Salvar Alterações</button>
+        <span class="mx-1">|</span>
+        <a  class="btn btn-secondary" href="/tarefas/index"><i class="fa fa-arrow-left fa-fw"></i> Voltar</a>
+    </div>    
 </form>
 
 <?php

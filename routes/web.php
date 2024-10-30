@@ -8,6 +8,8 @@ use Controllers\UsuarioController;
 return [
     'forgot-password' => [AuthController::class, 'forgotPassword'],
     'reset-password' => [AuthController::class, 'resetPassword'],
+    'verify-required' => [AuthController::class, 'verifyRequired'],
+    'verify-email' => [AuthController::class, 'verifyEmail'],
     'login' => [AuthController::class, 'login'],
     'logout' => [AuthController::class, 'logout'],
     '' => [HomeController::class, 'index'],

@@ -1,5 +1,4 @@
 <?php
-session_start();
 if (!isset($_SESSION['user_id'])) {
     header('Location: /login');
     exit();
@@ -7,6 +6,13 @@ if (!isset($_SESSION['user_id'])) {
 
 ob_start(); // Inicia o buffer de saída
 ?>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="<?php echo BASE_URL ?>"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Tarefas</li>
+  </ol>
+</nav>
 
 <h2>Lista de Tarefas</h2>
 
@@ -27,7 +33,7 @@ ob_start(); // Inicia o buffer de saída
     </div>
 </div>
 
-<table class="table">
+<table class="table table-striped table-bordered table-sm mt-3">
     <thead>
         <th width="70" class="text-center">ID</th>
         <th>Título</th>

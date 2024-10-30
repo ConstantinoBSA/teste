@@ -1,4 +1,6 @@
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS password_resets;
+DROP TABLE IF EXISTS email_verifications;
 DROP TABLE IF EXISTS tarefas;
 
 CREATE TABLE usuarios (
@@ -13,6 +15,14 @@ CREATE TABLE usuarios (
 INSERT INTO usuarios (name, email, email_verified_at, password, status) VALUES ('João da Silva', 'joao.silva@example.com', NULL, '$2y$10$PgJZ8QykkZmU7IMiOu4/Q.dKo6JPbyLl1mxJiRuHr7xNVEFYWdXZe', TRUE);
 
 CREATE TABLE password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (email)
+);
+
+CREATE TABLE email_verifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     token VARCHAR(255) NOT NULL,

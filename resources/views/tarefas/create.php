@@ -2,6 +2,14 @@
 ob_start(); // Inicia o buffer de saída
 ?>
 
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="<?php echo BASE_URL ?>"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="<?php echo BASE_URL ?>/tarefas/index">Tarefas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Adicionar</li>
+  </ol>
+</nav>
+
 <h1>Criar Nova Tarefa</h1>
 <a href="/tarefas/index">Voltar</a>
 

@@ -35,7 +35,6 @@ class TarefaController extends Controller
 
     public function create()
     {
-        session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $validator = new Validator();
             $rules = [
@@ -67,7 +66,6 @@ class TarefaController extends Controller
 
     public function edit($id)
     {
-        session_start();
         $tarefaModel = $this->model('Tarefa');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $validator = new Validator();
@@ -105,7 +103,6 @@ class TarefaController extends Controller
 
     public function delete($id)
     {
-        session_start();
         $tarefaModel = $this->model('Tarefa');
         $tarefa = $tarefaModel->delete($id);
         if ($tarefa) {
