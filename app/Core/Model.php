@@ -19,7 +19,7 @@ class Model
             $this->pdo = new \PDO($dsn, $user, $password);
             $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
-            die('Database connection failed: ' . $e->getMessage());
+            echo 'Erro de conexão: ' . $e->getMessage();
         }
     }
 }

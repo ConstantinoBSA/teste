@@ -9,13 +9,33 @@ class TarefaController extends Controller
 {
     public function index()
     {
+        $search = $_GET['search'] ?? '';
+        $page = $_GET['page'] ?? 1;
+        $limit = 4; // Número de tarefas por página
+        $offset = ($page - 1) * $limit;
+        
         $tarefaModel = $this->model('Tarefa');
-        $tarefas = $tarefaModel->getAll();
-        $this->view('tarefas/index', ['tarefas' => $tarefas]);
+        $tarefas = $tarefaModel->getAll($search, $limit, $offset);
+        $totalTarefas = $tarefaModel->countTarefas($search);
+        $totalPages = ceil($totalTarefas / $limit);
+
+        $start = $offset + 1;
+        $end = min($offset + $limit, $totalTarefas);
+
+        $this->view('tarefas/index', [
+            'tarefas' => $tarefas,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'totalTarefas' => $totalTarefas,
+            'start' => $start,
+            'end' => $end,
+            'search' => $search
+        ]);
     }
 
     public function create()
     {
+        session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $validator = new Validator();
             $rules = [
@@ -30,9 +50,15 @@ class TarefaController extends Controller
                 $this->view('tarefas/create', ['error' => $errors, 'data' => $_POST]);
             } else {
                 $tarefaModel = $this->model('Tarefa');
-                $tarefaModel->create($_POST['titulo'], $_POST['descricao'], $_POST['status']);
+                $tarefa = $tarefaModel->create($_POST['titulo'], $_POST['descricao'], $_POST['status']);
+                if ($tarefa) {
+                    $_SESSION['message'] = "Registro adicionaado com sucesso!";
+                    $_SESSION['message_type'] = "success";
+                } else {
+                    $_SESSION['message'] = 'Erro ao adicionar tarefa. Por favor, tente novamente!';
+                    $_SESSION['message_type'] = "success";
+                }
                 header('Location: /tarefas/index');
-                exit();
             }
         } else {
             $this->view('tarefas/create', ['error' => [], 'data' => []]);
@@ -59,9 +85,11 @@ class TarefaController extends Controller
             } else {
                 $tarefa = $tarefaModel->update($id, $_POST['titulo'], $_POST['descricao'], $_POST['status']);
                 if ($tarefa) {
-                    $_SESSION['success_message'] = 'Tarefa editada com sucesso!';
+                    $_SESSION['message'] = "Registro editado com sucesso!";
+                    $_SESSION['message_type'] = "success";
                 } else {
-                    $_SESSION['error_message'] = 'Erro ao adicionar tarefa. Por favor, tente novamente!';
+                    $_SESSION['message'] = 'Erro ao editar tarefa. Por favor, tente novamente!';
+                    $_SESSION['message_type'] = "success";
                 }
                 header('Location: /tarefas/index');
             }
@@ -77,8 +105,16 @@ class TarefaController extends Controller
 
     public function delete($id)
     {
+        session_start();
         $tarefaModel = $this->model('Tarefa');
-        $tarefaModel->delete($id);
+        $tarefa = $tarefaModel->delete($id);
+        if ($tarefa) {
+            $_SESSION['message'] = "Registro deletado com sucesso!";
+            $_SESSION['message_type'] = "success";
+        } else {
+            $_SESSION['message'] = 'Erro ao editar deletar. Por favor, tente novamente!';
+            $_SESSION['message_type'] = "success";
+        }
         header('Location: /tarefas/index');
     }
 
@@ -87,7 +123,7 @@ class TarefaController extends Controller
     {
         $errorTitle = $title;
         $errorMessage = $message;
-        include 'views/error.php';
+        include '../resources/views/error.php';
         exit();
     }
 }

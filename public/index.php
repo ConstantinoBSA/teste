@@ -21,7 +21,7 @@ function renderErrorPage($title, $message)
 {
     $errorTitle = $title;
     $errorMessage = $message;
-    include __DIR__ . '/../views/error.php';
+    include __DIR__ . '/../resources/views/error.php';
     exit();
 }
 

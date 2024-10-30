@@ -1,6 +1,7 @@
 <?php
 
-function testar()
+function dd($termo)
 {
-    echo 'testar';
+    var_dump($termo);
+    die;
 }

@@ -6,6 +6,8 @@ use Controllers\TarefaController;
 use Controllers\UsuarioController;
 
 return [
+    'forgot-password' => [AuthController::class, 'forgotPassword'],
+    'reset-password' => [AuthController::class, 'resetPassword'],
     'login' => [AuthController::class, 'login'],
     'logout' => [AuthController::class, 'logout'],
     '' => [HomeController::class, 'index'],
