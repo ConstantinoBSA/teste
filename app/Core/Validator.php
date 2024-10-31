@@ -4,14 +4,24 @@ namespace Core;
 
 class Validator {
     protected $errors = [];
+    protected $pdo;
+
+    public function __construct() {
+        $this->pdo = Database::getInstance()->getConnection();
+    }
 
     public function validate($data, $rules) {
         foreach ($rules as $field => $ruleSet) {
             $rulesArray = explode('|', $ruleSet);
             foreach ($rulesArray as $rule) {
+                $parameters = [];
+                if (strpos($rule, ':') !== false) {
+                    list($rule, $paramString) = explode(':', $rule);
+                    $parameters = explode(',', $paramString);
+                }
                 $method = 'validate' . ucfirst($rule);
                 if (method_exists($this, $method)) {
-                    $this->$method($field, $data[$field] ?? null);
+                    $this->$method($field, $data[$field] ?? null, $parameters);
                 }
             }
         }
@@ -30,5 +40,53 @@ class Validator {
         }
     }
 
-    // Adicione outros métodos de validação conforme necessário
+    protected function validateUnique($field, $value, $parameters) {
+        dd($parameters);
+        if (count($parameters) < 2) {
+            $this->errors[$field] = 'Erro de validação: parâmetros insuficientes para a validação única.';
+            return;
+        }
+
+        list($table, $column) = $parameters;
+        $excludeId = $parameters[2] ?? null;
+
+        if ($this->pdo) {
+            $sql = "SELECT COUNT(*) FROM $table WHERE $column = :value";
+            if ($excludeId) {
+                $sql .= " AND id != :excludeId";
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':value', $value);
+            if ($excludeId) {
+                $stmt->bindParam(':excludeId', $excludeId);
+            }
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+            if ($count > 0) {
+                $this->errors[$field] = 'O valor do campo ' . $field . ' já está em uso.';
+            }
+        } else {
+            $this->errors[$field] = 'Erro de validação: conexão com o banco de dados não configurada.';
+        }
+    }
+
+    protected function validateMin($field, $value, $parameters) {
+        $min = $parameters[0];
+        if (strlen($value) < $min) {
+            $this->errors[$field] = 'O campo ' . $field . ' deve ter pelo menos ' . $min . ' caracteres.';
+        }
+    }
+
+    protected function validateMax($field, $value, $parameters) {
+        $max = $parameters[0];
+        if (strlen($value) > $max) {
+            $this->errors[$field] = 'O campo ' . $field . ' não pode ter mais de ' . $max . ' caracteres.';
+        }
+    }
+
+    protected function validateNumeric($field, $value) {
+        if (!is_numeric($value)) {
+            $this->errors[$field] = 'O campo ' . $field . ' deve ser numérico.';
+        }
+    }
 }

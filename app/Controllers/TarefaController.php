@@ -57,7 +57,7 @@ class TarefaController extends Controller
             ];
 
             $rules = [
-                'titulo' => 'required',
+                'titulo' => 'required|unique:tarefas',
                 'descricao' => 'required',
                 'status' => 'required'
             ];
