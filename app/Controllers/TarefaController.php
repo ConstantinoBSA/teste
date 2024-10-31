@@ -4,9 +4,19 @@ namespace Controllers;
 
 use Core\Controller;
 use Core\Validator;
+use App\Core\Sanitizer;
 
 class TarefaController extends Controller
 {
+    protected $sanitizer;
+    protected $validator;
+
+    public function __construct()
+    {
+        $this->sanitizer = new Sanitizer();
+        $this->validator = new Validator();
+    }
+
     public function index()
     {
         $search = $_GET['search'] ?? '';
@@ -36,20 +46,29 @@ class TarefaController extends Controller
     public function create()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $validator = new Validator();
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                die('Token CSRF inválido.');
+            }
+
+            $sanitizedData = [
+                'titulo' => $this->sanitizer->sanitizeString($_POST['titulo']),
+                'descricao' => $this->sanitizer->sanitizeString($_POST['descricao']),
+                'status' => $this->sanitizer->sanitizeString($_POST['status']),
+            ];
+
             $rules = [
                 'titulo' => 'required',
                 'descricao' => 'required',
                 'status' => 'required'
             ];
 
-            $errors = $validator->validate($_POST, $rules);
+            $errors = $this->validator->validate($sanitizedData, $rules);
 
             if (!empty($errors)) {
-                $this->view('tarefas/create', ['error' => $errors, 'data' => $_POST]);
+                $this->view('tarefas/create', ['error' => $errors, 'data' => $sanitizedData]);
             } else {
                 $tarefaModel = $this->model('Tarefa');
-                $tarefa = $tarefaModel->create($_POST['titulo'], $_POST['descricao'], $_POST['status']);
+                $tarefa = $tarefaModel->create($sanitizedData['titulo'], $sanitizedData['descricao'], $sanitizedData['status']);
                 if ($tarefa) {
                     $_SESSION['message'] = "Registro adicionaado com sucesso!";
                     $_SESSION['message_type'] = "success";
@@ -57,6 +76,10 @@ class TarefaController extends Controller
                     $_SESSION['message'] = 'Erro ao adicionar tarefa. Por favor, tente novamente!';
                     $_SESSION['message_type'] = "success";
                 }
+
+                // Token válido, remova-o da sessão
+                unset($_SESSION['csrf_token']);
+
                 header('Location: /tarefas/index');
             }
         } else {
@@ -68,14 +91,17 @@ class TarefaController extends Controller
     {
         $tarefaModel = $this->model('Tarefa');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $validator = new Validator();
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                die('Token CSRF inválido.');
+            }
+
             $rules = [
                 'titulo' => 'required',
                 'descricao' => 'required',
                 'status' => 'required'
             ];
 
-            $errors = $validator->validate($_POST, $rules);
+            $errors = $this->validator->validate($_POST, $rules);
 
             if (!empty($errors)) {
                 $data = array_merge($_POST, ['id' => $id]);
@@ -89,6 +115,10 @@ class TarefaController extends Controller
                     $_SESSION['message'] = 'Erro ao editar tarefa. Por favor, tente novamente!';
                     $_SESSION['message_type'] = "success";
                 }
+
+                // Token válido, remova-o da sessão
+                unset($_SESSION['csrf_token']);
+
                 header('Location: /tarefas/index');
             }
         } else {

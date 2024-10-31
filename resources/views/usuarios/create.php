@@ -1,11 +1,16 @@
 <?php
 ob_start(); // Inicia o buffer de saída
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 
 <h1>Criar Nova Tarefa</h1>
 <a href="/usuarios/index">Voltar</a>
 
 <form method="post" action="/usuarios/create">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+    
     <div class="mb-3">
         <label for="name" class="form-label">Nome</label>
         <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($data['name'] ?? ''); ?>">

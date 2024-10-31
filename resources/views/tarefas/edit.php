@@ -1,5 +1,8 @@
 <?php
 ob_start(); // Inicia o buffer de saída
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 
 <nav aria-label="breadcrumb">
@@ -13,6 +16,8 @@ ob_start(); // Inicia o buffer de saída
 <h4 class="mb-4">Editando Tarefa</h4>
 
 <form method="post" action="/tarefas/edit/<?php echo $data['id']; ?>" class="w-50">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+    
     <div class="mb-3">
         <label for="titulo" class="form-label">Título</label>
         <input type="text" class="form-control" id="titulo" name="titulo" value="<?php echo htmlspecialchars($data['titulo'] ?? ''); ?>">

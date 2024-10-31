@@ -39,6 +39,10 @@ class UsuarioController extends Controller
     public function create()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                die('Token CSRF inválido.');
+            }
+
             $validator = new Validator();
             $rules = [
                 'name' => 'required',
@@ -68,6 +72,10 @@ class UsuarioController extends Controller
                     $_SESSION['message'] = 'Erro ao adicionar usuario. Por favor, tente novamente!';
                     $_SESSION['message_type'] = "success";
                 }
+
+                // Token válido, remova-o da sessão
+                unset($_SESSION['csrf_token']);
+                
                 header('Location: /usuarios/index');
             }
         } else {
@@ -79,7 +87,15 @@ class UsuarioController extends Controller
     {
         $usuarioModel = $this->model('Usuario');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                die('Token CSRF inválido.');
+            }
+
             $usuario = $usuarioModel->update($id, $_POST['email']);
+
+            // Token válido, remova-o da sessão
+            unset($_SESSION['csrf_token']);
+
             header('Location: /usuarios/index');
         } else {
             $usuario = $usuarioModel->getById($id);

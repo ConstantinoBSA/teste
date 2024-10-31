@@ -13,33 +13,16 @@ $config = require __DIR__ . '/../../../config/config.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <style>
-        body {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-        .main-content {
-            flex: 1;
-            display: flex;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #f8f9fa;
-            padding: 15px;
-        }
-        .content {
-            flex: 1;
-            padding: 20px;
-        }
-    </style>
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><img src="<?php echo BASE_URL; ?>/images/logo.jpg" alt="LOGO" width="30" class="me-2"><?php echo $config['app']['app_name'] ?? '[NOME_PROJETO]'; ?></a>
             <form class="d-flex ms-auto">
-                <input class="form-control me-2" type="search" placeholder="Procurar" aria-label="Search">
+                <div class="input-group input-group-sm me-2">
+                    <input type="search" class="form-control" placeholder="Procurar" style="width: 350px;">
+                    <button class="btn btn-outline-secondary" type="button" id="button-addon2"><i class="fa fa-search"></i></button>
+                </div>
             </form>
             <div class="dropdown ms-3">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -86,7 +69,7 @@ $config = require __DIR__ . '/../../../config/config.php';
                 toastr.<?php echo $_SESSION['message_type']; ?>("<?php echo $_SESSION['message']; ?>");
                 <?php
                     unset($_SESSION['message']);
-                    unset($_SESSION['message_type']);
+                unset($_SESSION['message_type']);
                 ?>
             <?php endif; ?>
         });
